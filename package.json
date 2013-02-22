@@ -1,28 +1,24 @@
 {
   "name": "tirunner",
   "description": "Very simple app runner for Appcelerator Titanium",
-  "version": "0.1.3",
-	"author"  : {
-	        "name"  : "Guido Bellomo",
-	        "email" : "guido.bellomo@gmail.com",
-	        "url"   : "http://javascript-jedi.com"
-	},  
+  "version": "0.1.4",
+  "author": {
+    "name": "Guido Bellomo",
+    "email": "guido.bellomo@gmail.com",
+    "url": "http://javascript-jedi.com"
+  },
   "keywords": [
     "test",
     "titanium",
     "nodejs",
     "jasmine"
   ],
-  "directories": {
-  },
-  "main": "./main.js", 
-
+  "directories": {},
+  "main": "./main.js",
   "engines": {
     "node": ">= 0.3.7"
   },
-  "devDependencies": {
-
-  },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/guidone/tirunner.git"
@@ -33,10 +29,8 @@
       "url": "http://www.opensource.org/licenses/mit-license.php"
     }
   ],
-  "dependencies": {
-  	},
-  "scripts": { 
-  	"postinstall" : "echo \"require('./node_modules/tirunner/main')(jake,desc,task,complete,fail,file,namespace,__dirname);\" >../../jakefile.js" 
-	  
-  }  	
+  "dependencies": {},
+  "scripts": {
+    "postinstall": "echo \"require('./node_modules/tirunner/main')(jake,desc,task,complete,fail,file,namespace,__dirname);\" >../../jakefile.js"
+  }
 }
