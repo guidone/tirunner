@@ -2,7 +2,9 @@
 var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
+
 var tirunnerVersion = '0.1.7';
+
 
 
 var _tiapp = null;
@@ -71,13 +73,12 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	
 	
 	desc('Run in iPhone Simulator');
-	task('run',['tiapp'],{async: true},function() {
+	task('run',['tiapp','kill'],{async: true},function() {
 		
 		var app_id = _tiapp['ti:app'].id[0];
 		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
 		var app_name = _tiapp['ti:app']['name'][0];		
 	
-	// !todo mettere $HOME qua	
 		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
 		var runCmd = [
 			//'export ios_builder="/Volumes/OSX\ Boot/Users/guidob/Library/Application\ Support/Titanium/mobilesdk/osx/1.8.2/iphone/builder.py"',
