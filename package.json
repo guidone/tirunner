@@ -1,7 +1,7 @@
 {
   "name": "tirunner",
-  "description": "Very simple app runner for Appcelerator Titanium",
-  "version": "0.1.4",
+  "description": "Very simple appliation runner for Appcelerator Titanium",
+  "version": "0.1.7",
   "author": {
     "name": "Guido Bellomo",
     "email": "guido.bellomo@gmail.com",

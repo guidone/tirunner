@@ -2,21 +2,12 @@
 var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
-
+var tirunnerVersion = '0.1.7';
 
 
 var _tiapp = null;
 
 module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
-
-	var t = new jake.PackageTask('tirunner', 'v0.1.1', function () {
-		var fileList = [
-			'jakefile.js'
-		];
-		this.packageFiles.include(fileList);
-		this.needTarGz = true;
-		this.needTarBz2 = true;
-	});
 	
 	desc('Parse the tiapp.xml file');
 	task('tiapp',function() {
@@ -28,6 +19,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		    // store result
 		    _tiapp = result;
 		    // write header
+		    console.log(clc.cyan.bold('TiRunner v'+tirunnerVersion));
 		    console.log(clc.yellow('App: ')+_tiapp['ti:app']['name'][0]);
 		    console.log(clc.yellow('App-id: ')+_tiapp['ti:app'].id[0]+' v'+_tiapp['ti:app']['version'][0]);		    
 		    console.log(clc.yellow('Titanium SDK: ')+_tiapp['ti:app']['sdk-version'][0]);
