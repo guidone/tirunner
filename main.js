@@ -1,4 +1,4 @@
-module.exports = function(jake,desc,task,appPath) {
+module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 
 	var t = new jake.PackageTask('tirunner', 'v0.1.1', function () {
 		var fileList = [
@@ -7,6 +7,16 @@ module.exports = function(jake,desc,task,appPath) {
 		this.packageFiles.include(fileList);
 		this.needTarGz = true;
 		this.needTarBz2 = true;
+	});
+	
+	
+	desc('The answer to the universe and everything');
+	task('echo',function() {
+		
+		console.log('42');
+
+		complete();
+				
 	});
 	
 	
