@@ -3,7 +3,7 @@ var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
 
-var tirunnerVersion = '0.1.7';
+var tirunnerVersion = '0.1.9';
 
 
 
