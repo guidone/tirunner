@@ -28,6 +28,20 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		
 	});
 	
+	desc('Generate documentation with JsDuck');
+	task('docs',function() {
+		jake.exec(
+			'jsduck --config=jsduck/jsduck.json',
+			function() {
+				console.log('Complete! Docs are in ./docs');
+			},
+			{
+				printStdout: true,
+				printStderr: true
+			}
+		);
+	});
+	
 	
 	desc('Run in iPhone Simulator');
 	task('run',{async: true},function() {
