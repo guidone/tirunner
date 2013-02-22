@@ -29,7 +29,10 @@
       "url": "http://www.opensource.org/licenses/mit-license.php"
     }
   ],
-  "dependencies": {},
+  "dependencies": {
+	  "cli-color": "0.2.2",
+	  "xml2js": "0.2.4"	  
+  },
   "scripts": {
     "postinstall": "echo \"require('./node_modules/tirunner/main')(jake,desc,task,complete,fail,file,namespace,__dirname);\" >../../jakefile.js"
   }

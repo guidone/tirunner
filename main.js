@@ -1,3 +1,12 @@
+
+var clc = require('cli-color');
+var fs = require('fs');
+var parseString = require('xml2js').parseString;
+
+
+
+var _tiapp = null;
+
 module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 
 	var t = new jake.PackageTask('tirunner', 'v0.1.1', function () {
@@ -9,9 +18,28 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		this.needTarBz2 = true;
 	});
 	
+	desc('Parse the tiapp.xml file');
+	task('tiapp',function() {
+
+		var fileContents = fs.readFileSync(appPath+'/tiapp.xml','utf8'); 
+
+		parseString(fileContents, function (err, result) {
+		    
+		    // store result
+		    _tiapp = result;
+		    // write header
+		    console.log(clc.yellow('App: ')+_tiapp['ti:app']['name'][0]);
+		    console.log(clc.yellow('App-id: ')+_tiapp['ti:app'].id[0]+' v'+_tiapp['ti:app']['version'][0]);		    
+		    console.log(clc.yellow('Titanium SDK: ')+_tiapp['ti:app']['sdk-version'][0]);
+		    
+		    complete();
+		});
+		
+	});
+	
 	
 	desc('The answer to the universe and everything');
-	task('echo',function() {
+	task('echo',['tiapp'],function() {
 		
 		console.log('42');
 
@@ -24,16 +52,23 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	task('clean',function() {
 		
 		jake.rmRf('build/iphone/build');
-		console.log('Project clean!');
+		console.log(clc.green('Project clean!'));
 		
 	});
 	
 	desc('Generate documentation with JsDuck');
 	task('docs',function() {
+
+		if (!fs.existsSync(appPath+'/jsduck/jsduck.json')) {
+			console.log(clc.red('Jsduck file not found.')+' ('+appPath+'/jsduck/jsduck.json'+')');
+			complete();
+			return false;
+		}
+
 		jake.exec(
 			'jsduck --config=jsduck/jsduck.json',
 			function() {
-				console.log('Complete! Docs are in ./docs');
+				console.log(clc.green('Docs complete!')+' Docs are in ./docs');
 			},
 			{
 				printStdout: true,
@@ -44,13 +79,17 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	
 	
 	desc('Run in iPhone Simulator');
-	task('run',{async: true},function() {
+	task('run',['tiapp'],{async: true},function() {
+		
+		var app_id = _tiapp['ti:app'].id[0];
+		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
+		var app_name = _tiapp['ti:app']['name'][0];		
 	
 	// !todo mettere $HOME qua	
-		var builder = '/Volumes/OSX\\ Boot/Users/guidob/Library/Application\\ Support/Titanium/mobilesdk/osx/1.8.2/iphone/builder.py';
+		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
 		var runCmd = [
 			//'export ios_builder="/Volumes/OSX\ Boot/Users/guidob/Library/Application\ Support/Titanium/mobilesdk/osx/1.8.2/iphone/builder.py"',
-			builder+' run "`pwd`" 6.1 "com.calzedonia.businesspad-quality" BusinessPad ipad'
+			builder+' run "`pwd`" 6.1 "'+app_id+'" '+app_name+' ipad'
 			];
 		
 		var ex = jake.createExec(
@@ -92,6 +131,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	task('kill',function() {
 		
 		killSimulator(function() {
+			console.log(clc.green('Simulator killed.'));
 			complete();
 		})
 		
