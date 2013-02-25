@@ -3,13 +3,18 @@ var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
 
-var tirunnerVersion = '0.2.0';
+var tirunnerVersion = '0.2.1';
 
 
 
 var _tiapp = null;
 
 module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
+	
+	
+
+	
+	
 	
 	desc('Parse the tiapp.xml file');
 	task('tiapp',function() {
@@ -78,9 +83,11 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	
 	desc('Clean the current build');
 	task('clean',function() {
-		
-		jake.rmRf('build/iphone/build');
+				
+		jake.rmRf(appPath+'/build/iphone');
 		console.log(clc.green('Project clean!'));
+		
+		complete();
 		
 	});
 	
@@ -124,6 +131,12 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		var app_id = _tiapp['ti:app'].id[0];
 		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
 		var app_name = _tiapp['ti:app']['name'][0];		
+	
+		// check if we are in testing, then restore
+		// remove test case file
+		if (fs.existsSync(appPath+'/Resources/test_case.js')) {
+			fs.unlinkSync(appPath+'/Resources/test_case.js');
+		}
 	
 		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
 		var runCmd = [
@@ -170,16 +183,36 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	});
 	
 	
-	desc('Run tests in simulator');
-	task('test',['tiapp'],{async: true},function() {
+	
+	desc('Run tests in simulator, get tests from /tests/*. Use parameters to specify a particulat test: jake test[my_test]');
+	task('test',['tiapp'],{async: true},function(test_file) {
 	
 		var app_id = _tiapp['ti:app'].id[0];
 		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
 		var app_name = _tiapp['ti:app']['name'][0];		
 	
+		// remove old test case file
+		if (fs.existsSync(appPath+'/Resources/test_case.js')) {
+			fs.unlinkSync(appPath+'/Resources/test_case.js');
+		}
+		var tests = jake.readdirR(appPath+'/Resources/tests');
+		var test_case = '';
+		
+		tests.forEach(function(item) {
+			if (item != (appPath+'/Resources/tests') && item.indexOf('.svn') == -1) {				
+				var fileName = item.replace(appPath+'/Resources','');
+				// filter test files
+				if (test_file == null || test_file == '' || fileName.indexOf(test_file) !== -1) {
+					test_case += 'Ti.include("'+fileName+'");\n';
+				}
+			}
+			
+		});
+		fs.writeFileSync(appPath+'/Resources/test_case.js',test_case);
+		
 		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
 		var runCmd = [
-			builder+' run "`pwd`" 6.1 "'+app_id+'-tirunner" '+app_name+'Jasmine ipad'
+			builder+' run "`pwd`" 6.1 "'+app_id+'" '+app_name+' ipad'
 			];	
 			
 		var ex = jake.createExec(
@@ -190,6 +223,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		);
 		ex.addListener('stdout',stdoutListener);
 		ex.run();
+	
 		
 	});
 

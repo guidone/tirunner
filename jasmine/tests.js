@@ -3,7 +3,7 @@
 	Ti.include('/tirunner/lib/jasmine-titanium.js');
 	
 	// Include all the test files
-	Ti.include('/tests/test_main.js');
+	Ti.include('/test_case.js');
 	
 	jasmine.getEnv().addReporter(new jasmine.TitaniumReporter());
 	jasmine.getEnv().execute();
