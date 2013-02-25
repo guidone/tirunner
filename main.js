@@ -3,7 +3,7 @@ var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
 
-var tirunnerVersion = '0.1.10';
+var tirunnerVersion = '0.2.0';
 
 
 
@@ -28,6 +28,40 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		    
 		    complete();
 		});
+		
+	});
+	
+	
+	desc('Install TiRunner/Jasmin test directory');
+	task('install',function() {
+		
+	
+		// create directory
+		var localTiRunner = appPath+'/Resources/tirunner';
+		var moduleTiRunner = appPath+'/node_modules/tirunner/jasmine';
+
+		// delete if exists
+		if (fs.existsSync(localTiRunner)) {
+			fs.unlinkSync(localTiRunner);
+		}
+		
+		// link
+		jake.exec(
+			'ln -s '+moduleTiRunner+' '+localTiRunner,
+			function() {
+				console.log(clc.green('TiRunnner/Jasmine installed.'));
+				console.log('Copy this code somewhere to start your tests');
+				var code = clc.xterm(246);
+				console.log('');
+				console.log(code('  if (Ti.App.id.match(/\-jasmine$/)) { Ti.include("/tirunner/tests.js"); }'));
+				console.log('');
+			},
+			{
+				printStdout: false,
+				printStderr: true
+			}
+		);
+
 		
 	});
 	
@@ -72,8 +106,20 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	});
 	
 	
+	var stdoutListener = function(raw) {
+		var msg = raw.toString().split('\n');		
+		msg.forEach(function(msg) {
+			if (msg.indexOf('[INFO]') !== -1) {
+				console.log(msg.replace('[INFO]',clc.green('[INFO]')));	
+			} else if (msg.indexOf('[ERROR]') !== -1) {
+				console.log(msg.replace('[ERROR]',clc.red('[ERROR]')));	
+			}			
+		});
+					
+	};
+	
 	desc('Run in iPhone Simulator');
-	task('run',['tiapp','kill'],{async: true},function() {
+	task('run',['tiapp'],{async: true},function() {
 		
 		var app_id = _tiapp['ti:app'].id[0];
 		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
@@ -91,18 +137,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 				printStdout: false
 			}
 		);
-		ex.addListener('stdout',function(raw) {
-			var msg = raw.toString().split('\n');		
-			msg.forEach(function(msg) {
-				if (msg.indexOf('[INFO]') !== -1 || msg.indexOf('[ERROR]') !== -1) {
-					console.log(msg);	
-				}			
-			});
-						
-		});
-		ex.addListener('error',function() {
-			console.log('finito e killo');
-		});
+		ex.addListener('stdout',stdoutListener);
 		
 		ex.run();
 		
@@ -123,40 +158,37 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	desc('Kill the simulator');
 	task('kill',function() {
 		
-		killSimulator(function() {
-			console.log(clc.green('Simulator killed.'));
-			complete();
-		})
+		try {
+			killSimulator(function() {
+				console.log(clc.green('Simulator killed.'));
+				complete();
+			});
+		} catch(e) {
+			// go on
+		}
 		
 	});
 	
 	
 	desc('Run tests in simulator');
-	task('test',{async: true},function() {
+	task('test',['tiapp'],{async: true},function() {
 	
-		console.log('Running test in simulator');
-	// !todo mettere $HOME qua	
-		var builder = '/Volumes/OSX\\ Boot/Users/guidob/Library/Application\\ Support/Titanium/mobilesdk/osx/1.8.2/iphone/builder.py';
+		var app_id = _tiapp['ti:app'].id[0];
+		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
+		var app_name = _tiapp['ti:app']['name'][0];		
+	
+		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
 		var runCmd = [
-			//'export ios_builder="/Volumes/OSX\ Boot/Users/guidob/Library/Application\ Support/Titanium/mobilesdk/osx/1.8.2/iphone/builder.py"',
-			builder+' run "`pwd`" 6.1 "com.calzedonia.businesspad-quality-jasmine" BusinessPadJasmine ipad'
-			];
-		
+			builder+' run "`pwd`" 6.1 "'+app_id+'-tirunner" '+app_name+'Jasmine ipad'
+			];	
+			
 		var ex = jake.createExec(
 			runCmd, 
 			{
 				printStdout: false
 			}
 		);
-		ex.addListener('stdout',function(raw) {
-			var msg = raw.toString().split('\n');		
-			msg.forEach(function(msg) {
-				if (msg.indexOf('[INFO]') !== -1 || msg.indexOf('[ERROR]') !== -1 || true) {
-					console.log(msg);	
-				}			
-			});
-						
-		});
+		ex.addListener('stdout',stdoutListener);
 		ex.run();
 		
 	});
