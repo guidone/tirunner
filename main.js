@@ -3,17 +3,13 @@ var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
 
-var tirunnerVersion = '0.2.1';
+var tirunnerVersion = '0.2.2';
 
 
 
 var _tiapp = null;
 
 module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
-	
-	
-
-	
 	
 	
 	desc('Parse the tiapp.xml file');
@@ -37,7 +33,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	});
 	
 	
-	desc('Install TiRunner/Jasmin test directory');
+	desc('Install TiRunner/Jasmin test directory in ./Resources');
 	task('install',function() {
 		
 	
@@ -58,7 +54,8 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 				console.log('Copy this code somewhere to start your tests');
 				var code = clc.xterm(246);
 				console.log('');
-				console.log(code('  if (Ti.App.id.match(/\-jasmine$/)) { Ti.include("/tirunner/tests.js"); }'));
+				console.log(code('  var test_case_file = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory,"test_case.js");'));
+				console.log(code('  if(test_case_file.exists()) { Ti.include("/tirunner/tests.js"); }'));
 				console.log('');
 			},
 			{
