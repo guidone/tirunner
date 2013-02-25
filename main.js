@@ -3,7 +3,7 @@ var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
 
-var tirunnerVersion = '0.2.2';
+var tirunnerVersion = '0.2.3';
 
 
 
@@ -39,7 +39,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	
 		// create directory
 		var localTiRunner = appPath+'/Resources/tirunner';
-		var moduleTiRunner = appPath+'/node_modules/tirunner/jasmine';
+		var moduleTiRunner = appPath+'/node_modules/tirunner';
 
 		// delete if exists
 		if (fs.existsSync(localTiRunner)) {
@@ -55,7 +55,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 				var code = clc.xterm(246);
 				console.log('');
 				console.log(code('  var test_case_file = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory,"test_case.js");'));
-				console.log(code('  if(test_case_file.exists()) { Ti.include("/tirunner/tests.js"); }'));
+				console.log(code('  if(test_case_file.exists()) { Ti.include("/tirunner/jasmine/tests.js"); }'));
 				console.log('');
 			},
 			{
