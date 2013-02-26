@@ -4,7 +4,7 @@ var fs = require('fs');
 var parseString = require('xml2js').parseString;
 
 
-var tirunnerVersion = '0.2.6';
+var tirunnerVersion = '0.2.7';
 
 
 
@@ -245,13 +245,23 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	
 	
 	desc('Clean the current build');
-	task('clean',function() {
+	task('clean',{async: true},function() {
+		
 				
-		jake.rmRf(appPath+'/build/iphone');
-		console.log(clc.green('Project clean!'));
-		
-		complete();
-		
+		jake.exec(
+			'rm -rf '+appPath+'/build/iphone/',
+			function() {
+				
+				console.log(clc.green('Project clean!'));
+				complete();
+
+			},
+			{
+				printStdout: false,
+				printStderr: true
+			}
+		);
+				
 	});
 	
 	desc('Generate documentation with JsDuck');
