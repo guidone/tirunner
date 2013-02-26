@@ -4,7 +4,7 @@ var fs = require('fs');
 var parseString = require('xml2js').parseString;
 
 
-var tirunnerVersion = '0.2.5';
+var tirunnerVersion = '0.2.6';
 
 
 
