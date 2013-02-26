@@ -1,7 +1,7 @@
 {
   "name": "tirunner",
   "description": "Very simple application runner for Appcelerator Titanium",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": {
     "name": "Guido Bellomo",
     "email": "guido.bellomo@gmail.com",
@@ -32,7 +32,8 @@
   "dependencies": {
     "cli-color": "0.2.2",
     "xml2js": "0.2.4",
-    "chai": "1.5.0"
+    "chai": "1.5.0",
+    "jshint": "= 0.5.9"
   },
   "scripts": {
     "postinstall": "echo \"require('./node_modules/tirunner/main')(jake,desc,task,complete,fail,file,namespace,__dirname);\" >../../jakefile.js"
