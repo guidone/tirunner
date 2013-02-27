@@ -4,7 +4,7 @@ var fs = require('fs');
 var parseString = require('xml2js').parseString;
 
 
-var tirunnerVersion = '0.2.7';
+var tirunnerVersion = '0.2.8';
 
 
 
@@ -298,17 +298,19 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 					
 	};
 	
-	desc('Run in iPhone Simulator');
-	task('run',['tiapp','unlink'],{async: true},function() {
+	desc('Run in iPhone Simulator, use parameter to specify a simulator version, es: jake run[6.0]');
+	task('run',['tiapp','unlink'],{async: true},function(simulator_version) {
 		
 		var app_id = _tiapp['ti:app'].id[0];
 		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
-		var app_name = _tiapp['ti:app']['name'][0];		
+		var app_name = _tiapp['ti:app']['name'][0];
+		
+		simulator_version = simulator_version != null ? simulator_version : '6.1';		
 		
 		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
 		var runCmd = [
 			//'export ios_builder="/Volumes/OSX\ Boot/Users/guidob/Library/Application\ Support/Titanium/mobilesdk/osx/1.8.2/iphone/builder.py"',
-			builder+' run "`pwd`" 6.1 "'+app_id+'" '+app_name+' ipad'
+			builder+' run "`pwd`" '+simulator_version+' "'+app_id+'" '+app_name+' ipad'
 			];
 		
 		var ex = jake.createExec(
@@ -351,8 +353,8 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	
 	
 	
-	desc('Run tests in simulator, get tests from /tests/*. Use parameters to specify a particulat test: jake test[my_test]');
-	task('test',['tiapp'],{async: true},function(test_file) {
+	desc('Run tests in simulator, get tests from /tests/*. Use parameters to specify a particulat test and simulator version: jake test[my_test,simulator_version]');
+	task('test',['tiapp'],{async: true},function(test_file,simulator_version) {
 	
 		// call link with params
 		jake.Task['link'].invoke(test_file);
@@ -361,10 +363,11 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
 		var app_name = _tiapp['ti:app']['name'][0];		
 	
+		simulator_version = simulator_version != null ? simulator_version : '6.1';
 		
 		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
 		var runCmd = [
-			builder+' run "`pwd`" 6.1 "'+app_id+'" '+app_name+' ipad'
+			builder+' run "`pwd`" '+simulator_version+' "'+app_id+'" '+app_name+' ipad'
 			];	
 			
 		var ex = jake.createExec(
