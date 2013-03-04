@@ -6,6 +6,7 @@ var chai = require('/tirunner/node_modules/chai/chai');
 
 	Ti.include('/tirunner/jasmine/lib/jasmine-1.0.2.js');
 	Ti.include('/tirunner/jasmine/lib/jasmine-titanium.js');
+	Ti.include('/tirunner/jasmine/lib/jasmine.asynch.js');
 	Ti.include('/tirunner/jasmine/matchers.js');
 	
 	// Include all the test files

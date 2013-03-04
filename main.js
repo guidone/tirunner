@@ -2,9 +2,9 @@
 var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
+var _ = require('underscore');
 
-
-var tirunnerVersion = '0.2.8';
+var tirunnerVersion = '0.2.10';
 
 
 
@@ -109,6 +109,53 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 					
 		}
 
+	desc('Compile the release notes');
+	task('releasenotes',function() {
+		
+		// get tags
+		// svn list https://dssvnsrv.dsgroup.it/svn/calzedonia/tags sort
+		// get 
+		//svn log https://dssvnsrv.dsgroup.it/svn/calzedonia/tags/1.3.32\ production -v --stop-on-copy
+		
+		// se non si sceglie un tag, prende l'ultimo tag
+		// trova revisione dal tag
+		// trova ultima revisione
+		// commenti tra le due revisioni
+		// estrazione dei #
+		
+		
+		
+		
+		var output = '';
+		var runCmd = [
+			'svn log -r 3207:3193'
+			];	
+			
+		var ex = jake.createExec(
+			runCmd, 
+			{
+				printStdout: false
+			}
+		);
+		ex.addListener('stdout',function(raw) {
+			output += raw.toString();			
+		});
+		ex.addListener('cmdEnd',function() {
+									
+			var bugs = _.uniq(output.match(/#([0-9]+)/g));
+						
+		});
+		ex.run();		
+		
+		
+		
+	});
+	
+	
+	
+	
+	
+	
 	
 	desc('Check JavaScript files with JSHint');
 	task('check',function(check_file) {
@@ -298,6 +345,10 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 					
 	};
 	
+	function getUserHome() {
+		return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+	}	
+	
 	desc('Run in iPhone Simulator, use parameter to specify a simulator version, es: jake run[6.0]');
 	task('run',['tiapp','unlink'],{async: true},function(simulator_version) {
 		
@@ -305,11 +356,18 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
 		var app_name = _tiapp['ti:app']['name'][0];
 		
+				
 		simulator_version = simulator_version != null ? simulator_version : '6.1';		
 		
-		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
+		var builder = getUserHome()+'/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
+		var builder_check = getUserHome()+'/Library/Application\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
+
+		// check if exists builder
+		if (!fs.existsSync(builder_check)) {
+			fail(clc.red('Titanium SDK '+ti_sdk+' is missing. '));
+		}
+		
 		var runCmd = [
-			//'export ios_builder="/Volumes/OSX\ Boot/Users/guidob/Library/Application\ Support/Titanium/mobilesdk/osx/1.8.2/iphone/builder.py"',
 			builder+' run "`pwd`" '+simulator_version+' "'+app_id+'" '+app_name+' ipad'
 			];
 		
@@ -320,6 +378,38 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			}
 		);
 		ex.addListener('stdout',stdoutListener);
+		
+		ex.run();
+		
+	});
+
+	desc('Debug in iPhone Simulator, show all parameters use parameter to specify a simulator version, es: jake run[6.0]');
+	task('debug',['tiapp'],{async: true},function(simulator_version) {
+		
+		var app_id = _tiapp['ti:app'].id[0];
+		var ti_sdk = _tiapp['ti:app']['sdk-version'][0];
+		var app_name = _tiapp['ti:app']['name'][0];
+						
+		simulator_version = simulator_version != null ? simulator_version : '6.1';		
+		
+		var builder = getUserHome()+'/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
+		var builder_check = getUserHome()+'/Library/Application\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
+
+		// check if exists builder
+		if (!fs.existsSync(builder_check)) {
+			fail(clc.red('Titanium SDK '+ti_sdk+' is missing. '));
+		}
+		
+		var runCmd = [
+			builder+' run "`pwd`" '+simulator_version+' "'+app_id+'" '+app_name+' ipad'
+			];
+		
+		var ex = jake.createExec(
+			runCmd, 
+			{
+				printStdout: true
+			}
+		);
 		
 		ex.run();
 		
@@ -366,6 +456,13 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		simulator_version = simulator_version != null ? simulator_version : '6.1';
 		
 		var builder = '$HOME/Library/Application\\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
+		var builder_check = getUserHome()+'/Library/Application\ Support/Titanium/mobilesdk/osx/'+ti_sdk+'/iphone/builder.py';
+
+		// check if exists builder
+		if (!fs.existsSync(builder_check)) {
+			fail(clc.red('Titanium SDK '+ti_sdk+' is missing. '));
+		}
+
 		var runCmd = [
 			builder+' run "`pwd`" '+simulator_version+' "'+app_id+'" '+app_name+' ipad'
 			];	
@@ -381,6 +478,9 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	
 		
 	});
+
+
+
 
 
 };
