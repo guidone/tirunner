@@ -3,11 +3,9 @@ var clc = require('cli-color');
 var fs = require('fs');
 var parseString = require('xml2js').parseString;
 var _ = require('underscore');
+var bower = require('bower');
 
-var tirunnerVersion = '0.2.10';
-
-
-
+var tirunnerVersion = '0.3.0';
 var _tiapp = null;
 var _globalLineCount = 0;
 
@@ -16,22 +14,128 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 
 	var jshint = require(appPath+'/node_modules/tirunner/node_modules/jshint/packages/jshint/jshint.js').JSHINT;	
 	
+	
+	desc('Init the packet manager');
+	task('init',['tiapp'],function() {
+		
+		// write the bowerrc anyway
+		var bowerrc = '{"directory": "Resources/components","json": "component.json",'
+			+'"endpoint"  : "http://localhost:4000","searchpath" : ["http://localhost:4000/"]}';
+		
+		fs.writeFileSync(appPath+'/.bowerrc',bowerrc,'utf8'); 
+		
+		// if not exist, create the component.js
+		if (!fs.existsSync(appPath+'/component.json')) {
+
+			var component = {
+			  "name": _tiapp['ti:app']['name'][0],
+			  "version": _tiapp['ti:app']['version'][0], 
+			  "main": "",
+			  "dependencies": {
+			  }
+			}
+			
+			fs.writeFileSync(appPath+'/component.json',JSON.stringify(component),'utf8'); 
+
+		}
+		
+		console.log('Init packet manager...'+clc.green('OK'));
+				
+	});
+	
+	
+	desc('Install a packet from repository');
+	task('install',['init'],{async: true},function(name,version) {
+		
+			
+		if (name == null || name == '') {
+			console.log(clc.red('Missing packet name'));
+		}
+				
+		// convert to string
+		var packetName = String(name);
+		
+		if (version != null) {
+			if (version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/)) {
+				console.log('Installing packet '+clc.cyan(packetName)+' v'+version);
+				packetName += '#'+version;
+			} else {
+				console.log(clc.red('Invalid version number, use x.y.z format')+' ('+version+')');
+				fail();
+			}
+		} else {
+			console.log('Installing packet '+clc.cyan(packetName));	
+		}
+						
+		bower.commands.install([packetName],{save: true})
+			.on('result',function(result) {
+				console.log(result);	
+			})
+			.on('packages',function(pack) {
+				console.log(pack);	
+			})
+			.on('data',function(data) {
+				console.log(data);	
+			})
+			.on('end', function (data) {
+				console.log('Install complete');
+				complete();
+			});
+		
+	});
+
+
+
+	desc('Uninstall a packet from project');
+	task('uninstall',['init'],{async: true},function(name,version) {
+					
+		if (name == null || name == '') {
+			console.log(clc.red('Missing packet name'));
+		}
+				
+		// convert to string
+		var packetName = String(name);
+		
+		console.log('Uninstalling packet '+clc.cyan(packetName));
+		
+		bower.commands.uninstall([packetName],{save: true})
+			.on('data',function(data) {
+				console.log(data);	
+			})
+			.on('end', function (data) {
+				console.log('Uninstall complete');
+				complete();
+			});
+		
+	});	
+		
 	desc('Parse the tiapp.xml file');
 	task('tiapp',{async: true},function() {
 
 		var fileContents = fs.readFileSync(appPath+'/tiapp.xml','utf8'); 
 
 		parseString(fileContents, function (err, result) {
-		    
+
+
+		    var name = clc.xterm(246);
 		    // store result
 		    _tiapp = result;
-		    // write header
-		    var name = clc.xterm(246);
+		    
+		    // modules string
+		    var modules = [];
+		    _(_tiapp['ti:app'].modules[0].module).each(function(module) {			    
+			    var str = name(module['_'])+':'+module['$'].version;			    
+			    modules.push(str);
+		    });
+		    		    
+		    // write header		    
 		    console.log(clc.cyan.bold('TiRunner v'+tirunnerVersion)+' - '+name('guido.bellomo@gmail.com'));
 		    console.log(clc.yellow('App: ')+_tiapp['ti:app']['name'][0]);
 		    console.log(clc.yellow('App-id: ')+_tiapp['ti:app'].id[0]+' v'+_tiapp['ti:app']['version'][0]);		    
 		    console.log(clc.yellow('Titanium SDK: ')+_tiapp['ti:app']['sdk-version'][0]);
-		    
+		    if (modules.length != 0) {
+		    	console.log(clc.yellow('Modules: ')+modules.join(', '));
+		    }
 		    complete();
 		});
 		
@@ -152,8 +256,29 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	});
 	
 	
+	desc('The default command');
+	task('default',function() {
+		
+		console.log('I\'m TiRunner, at your service. Type jake -T for a list of commands');
+		
+		complete();	
+	});
 	
 	
+	desc('Publish a packet to the repository');
+	task('publish',function() {
+		
+		
+		// check for component.json
+		
+		// check for git repository
+		
+		// check for repo clean
+		
+		// tag with the version and publish
+		
+			
+	});
 	
 	
 	
