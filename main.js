@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.3.0';
+var tirunnerVersion = '0.3.2';
 var _tiapp = null;
 var _globalLineCount = 0;
 
@@ -461,6 +461,9 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	var stdoutListener = function(raw) {
 		var msg = raw.toString().split('\n');		
 		msg.forEach(function(msg) {
+			if (msg.indexOf('SupMboFindAllWrapperProxy.m') != -1) {
+				return false;
+			}
 			if (msg.indexOf('[INFO]') !== -1) {
 				console.log(msg.replace('[INFO]',clc.green('[INFO]')));	
 			} else if (msg.indexOf('[ERROR]') !== -1) {
