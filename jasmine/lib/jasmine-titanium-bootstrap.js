@@ -83,8 +83,6 @@
 
 */
 
-			Ti.API.info('cosa loggo ? '+JSON.stringify(spec.results()))
-
 			
 			//var pass = spec.results().passedCount + ' pass';
 			var fail = null;

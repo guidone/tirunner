@@ -5,8 +5,9 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.3.2';
+var tirunnerVersion = '0.3.4';
 var _tiapp = null;
+var _tilocal = null;
 var _globalLineCount = 0;
 
 module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
@@ -140,6 +141,25 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		});
 		
 	});
+
+	desc('Parse local settings for this project');
+	task('tilocal',function() {
+		
+		if (fs.existsSync(appPath+'/.tirunner.json')) {
+
+			var fileContents = fs.readFileSync(appPath+'/.tirunner.json','utf8');
+			
+			try {
+				_tilocal = JSON.parse(fileContents);
+			} catch(e) {
+				console.log(clc.red('Error parsing .tirunnner.json file.')+'('+e.toString()+')');
+				complete();
+			}
+
+		}		
+		
+	});
+
 
 	/**
 	* @method getFileName
@@ -437,7 +457,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	});
 	
 	desc('Generate documentation with JsDuck');
-	task('docs',function() {
+	task('docs',['tiapp','tilocal'],function() {
 
 		if (!fs.existsSync(appPath+'/jsduck/jsduck.json')) {
 			console.log(clc.red('Jsduck file not found.')+' ('+appPath+'/jsduck/jsduck.json'+')');
@@ -448,7 +468,26 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		jake.exec(
 			'jsduck --config=jsduck/jsduck.json',
 			function() {
+				
+				// copy docs somewhere
+				if (_tilocal != null && _tilocal.docsDestinationPath) {
+					
+					console.log('Copying docs in '+_tilocal.docsDestinationPath);				
+					var docsFile = jake.readdirR(appPath+'/docs');
+
+					// removing all .svn directories
+					docsFile.forEach(function(dirName) {
+						if (dirName.match(/\/\.svn$/)) {
+							jake.rmRf(dirName);
+						}
+					});
+					
+					// copy the files, ensure / to copy inside
+					jake.cpR(appPath+'/docs/',_tilocal.docsDestinationPath);
+									
+				} 
 				console.log(clc.green('Docs complete!')+' Docs are in ./docs');
+
 			},
 			{
 				printStdout: true,
