@@ -50,12 +50,14 @@
 		var testResults = '';
 		var testResultsHeader = '<html><head>'
 	        +'<link rel="stylesheet" href="/tirunner/reporter/bootstrap.css" type="text/css">'
-	        +'<link rel="stylesheet" href="/tirunner/reporter/jasmine-bootstrap.css" type="text/css">' 		
+	        +'<link rel="stylesheet" href="/tirunner/reporter/jasmine-bootstrap.css" type="text/css">' 
+	        +'<script type="text/javascript" src="/tirunner/reporter/jquery-1.9.1.js"></script>'
+	        +'<script type="text/javascript" src="/tirunner/reporter/tirunner.js"></script>'
 			//+'<style type="text/css">body{font-size:14px;font-family:helvetica;background-color:#000000;color:#ffffff;}</style>'
 			+'</head><body>'
 			+'<div class="jasmine_reporter container show-passed">'
 				+'<h1 class="banner well"><span class="logo"><span class="title">TiRunner Tests</span>'
-				+'<small class="version">test?</small></span></h1>';
+				+'<small class="version"></small></span></h1>';
 
 
 
@@ -93,7 +95,7 @@
 					+'<a class="description">'+spec.description+' ('+spec.results().passedCount+') passed</a>';
 			} else {
 				result += '<div class="spec alert passed alert-success">'					
-					+'<a class="description">'+spec.description+'</a>';
+					+'<a class="description">'+spec.description+' ('+spec.results().passedCount+') passed</a>';
 			}
 
 
@@ -157,12 +159,13 @@
             var html = '';
             
             if (results.passedCount == results.totalCount) {
-	        	html += '<div class="suite alert alert-block passed alert-success">'
-	        		+'<a class="run_spec btn btn-mini btn-info">OK</a>';   
+	        	html += '<div class="suite alert alert-block passed alert-success hide-messages">'
+	        		+'<a class="run_spec btn btn-mini btn-info">OK</a>'
+	        		+'<a class="run_spec btn btn-mini btn-info btn-showall">SHOW</a>';   
             } else {
 	            html += '<div class="suite alert alert-block failed alert-error">';
             }
-            
+                        
             html += '<a class="description">'+suite.description+' ('+results.passedCount+' of '+results.totalCount+')<a>';
             
             html += capture_spec;

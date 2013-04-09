@@ -1,3 +1,7 @@
+.btn-showall {
+	margin-right: 10px;
+}
+
 .jasmine_reporter {
   margin-top: 8px;
   margin-left: 20px;
@@ -108,4 +112,8 @@
 .alert.alert-error .messages pre {
   color: #404040;
   line-height: normal;
+}
+
+.hide-messages div.spec {
+	display: none !important;
 }

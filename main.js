@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.3.4';
+var tirunnerVersion = '0.3.6';
 var _tiapp = null;
 var _tilocal = null;
 var _globalLineCount = 0;
@@ -483,10 +483,20 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 					});
 					
 					// copy the files, ensure / to copy inside
-					jake.cpR(appPath+'/docs/',_tilocal.docsDestinationPath);
+					jake.exec(
+						'cp -r '+appPath+'/docs/ '+_tilocal.docsDestinationPath,
+						function() {
+							console.log(clc.green('Docs complete!')+' Docs are in ./docs');
+						},
+						{
+							printStdout: true,
+							printStderr: true
+						}
+					);
+					//jake.cpR(appPath+'/docs/',_tilocal.docsDestinationPath);
 									
 				} 
-				console.log(clc.green('Docs complete!')+' Docs are in ./docs');
+				
 
 			},
 			{
