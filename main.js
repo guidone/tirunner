@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.3.6';
+var tirunnerVersion = '0.3.7';
 var _tiapp = null;
 var _tilocal = null;
 var _globalLineCount = 0;
@@ -20,7 +20,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	task('init',['tiapp'],function() {
 		
 		// write the bowerrc anyway
-		var bowerrc = '{"directory": "Resources/components","json": "component.json",'
+		var bowerrc = '{"directory": "Resources/components","json": "bower.json",'
 			+'"endpoint"  : "http://localhost:4000","searchpath" : ["http://localhost:4000/"]}';
 		
 		fs.writeFileSync(appPath+'/.bowerrc',bowerrc,'utf8'); 
@@ -109,6 +109,106 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			});
 		
 	});	
+	
+	desc('Bump versions in configuration files');
+	task('bump',['tiapp'],function() {
+		
+		var envs = ['prod','quality','test'];
+		var k = 0;
+
+		envs.forEach(function(env) {
+			
+			console.log('Bump version in '+clc.cyan(env)+' config files');
+
+			// replace tiapp.xml version
+			if (fs.existsSync(appPath+'/cfg/'+env+'/tiapp.xml')) {				
+				var tiapp = fs.readFileSync(appPath+'/cfg/'+env+'/tiapp.xml','utf8');
+				tiapp = tiapp.replace(/<version>.*?<\/version>/,'<version>'+_tiapp['ti:app']['version'][0]+'</version>');				
+				fs.writeFileSync(appPath+'/cfg/'+env+'/tiapp.xml',tiapp);			
+			} // end if file exist
+			
+			// replace Root.plist version
+			if (fs.existsSync(appPath+'/cfg/'+env+'/Settings.bundle/Root.plist')) {				
+				var plist = fs.readFileSync(appPath+'/cfg/'+env+'/Settings.bundle/Root.plist','utf8');
+				
+				// quick and dirty, don't want to parse xml
+				var searchFor = '<string>Release</string>';
+				var idx = plist.indexOf(searchFor);
+				var firstPart = plist.substr(0,idx+searchFor.length);
+				var secondPart = plist.substr(idx+searchFor.length);												
+				secondPart = secondPart.replace(/<string>.*?<\/string>/,'<string>'+_tiapp['ti:app']['version'][0]+'</string>');
+				
+				fs.writeFileSync(appPath+'/cfg/'+env+'/Settings.bundle/Root.plist',firstPart+secondPart);			
+			} // end if file exist
+						
+		});
+
+		// replace Root.plist version
+		if (fs.existsSync(appPath+'/platform/iphone/Settings.bundle/Root.plist')) {				
+			var plist = fs.readFileSync(appPath+'/platform/iphone/Settings.bundle/Root.plist','utf8');
+			
+			// quick and dirty, don't want to parse xml
+			var searchFor = '<string>Release</string>';
+			var idx = plist.indexOf(searchFor);
+			var firstPart = plist.substr(0,idx+searchFor.length);
+			var secondPart = plist.substr(idx+searchFor.length);												
+			secondPart = secondPart.replace(/<string>.*?<\/string>/,'<string>'+_tiapp['ti:app']['version'][0]+'</string>');
+			
+			fs.writeFileSync(appPath+'/platform/iphone/Settings.bundle/Root.plist',firstPart+secondPart);			
+		} // end if file exist
+
+		console.log(clc.green('Completed!'));
+		console.log('');	
+		
+	});
+	
+	
+	desc('Publish a component');
+	task('publish',{async: true},function() {
+		
+		var tagName = '1.0.5';
+
+		console.log('Publishing component');
+
+		// verifica sia tutto committato
+		//git status --porcelain
+		// verifica sia tutto pushato
+		// git rev-list HEAD --not --remotes
+
+
+		var output = '';
+		var runCmd = [
+			//'git push origin master',
+			'git tag -a v'+tagName+' -m \'Tagged version '+tagName+'\'',
+			'git push origin '+tagName
+			];	
+			
+		var ex = jake.createExec(
+			runCmd, 
+			{
+				printStdout: false
+			}
+		);
+		ex.addListener('stderr',function(msg,code) {
+			
+			console.log('Error: '+msg);
+			complete();
+			
+		});
+		ex.addListener('stdout',function(raw) {
+			output += raw.toString();			
+		});
+		ex.addListener('cmdEnd',function() {
+			
+			console.log(output);			
+			console.log('Finito!');
+			complete();
+						
+		});
+		ex.run();
+		
+		
+	});
 		
 	desc('Parse the tiapp.xml file');
 	task('tiapp',{async: true},function() {
@@ -247,9 +347,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		// commenti tra le due revisioni
 		// estrazione dei #
 		
-		
-		
-		
+			
 		var output = '';
 		var runCmd = [
 			'svn log -r 3207:3193'
@@ -282,22 +380,6 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		console.log('I\'m TiRunner, at your service. Type jake -T for a list of commands');
 		
 		complete();	
-	});
-	
-	
-	desc('Publish a packet to the repository');
-	task('publish',function() {
-		
-		
-		// check for component.json
-		
-		// check for git repository
-		
-		// check for repo clean
-		
-		// tag with the version and publish
-		
-			
 	});
 	
 	
