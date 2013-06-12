@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.3.8';
+var tirunnerVersion = '0.4.0';
 var _tiapp = null;
 var _tilocal = null;
 var _globalLineCount = 0;
@@ -21,7 +21,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		
 		// write the bowerrc anyway
 		var bowerrc = '{"directory": "Resources/components","json": "bower.json",'
-			+'"endpoint"  : "http://localhost:4000","searchpath" : ["http://localhost:4000/"]}';
+			+'"endpoint"  : "http://titanium.dsgroup.it:81"}';
 		
 		fs.writeFileSync(appPath+'/.bowerrc',bowerrc,'utf8'); 
 		
@@ -44,44 +44,96 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 				
 	});
 	
+	desc('Show all available components');
+	task('components',['init'],{async: true},function() {
+	
+		console.log('Available components ');
+	
+		bower.commands.search()
+				.on('packages',function(pack) {
+					// do nothing	
+				})
+				.on('data',function(data) {
+
+					console.log(data);	
+				})
+				.on('end', function (data) {
+					complete();
+				});	
+		
+	});
+	
+	desc('List all installed components');
+	task('list',['init'],{async: true},function() {
+	
+		console.log('Installed components:');
+	
+		bower.commands.list({offline: false})
+			.on('data', function (data) {
+				console.log(data);
+			})
+			.on('end', function (data) {
+			console.log(data);
+			})
+
+		
+	});
+
 	
 	desc('Install a packet from repository');
 	task('install',['init'],{async: true},function(name,version) {
 		
-			
-		if (name == null || name == '') {
-			console.log(clc.red('Missing packet name'));
-		}
-				
-		// convert to string
-		var packetName = String(name);
-		
-		if (version != null) {
-			if (version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/)) {
-				console.log('Installing packet '+clc.cyan(packetName)+' v'+version);
-				packetName += '#'+version;
+							
+		// just install the package
+		if (name != null) {
+
+			// convert to string
+			var packetName = String(name);
+
+			if (version != null) {
+				if (version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/)) {
+					console.log('Installing packet '+clc.cyan(packetName)+' v'+version);
+					packetName += '#'+version;
+				} else {
+					console.log(clc.red('Invalid version number, use x.y.z format')+' ('+version+')');
+					fail();
+				}
 			} else {
-				console.log(clc.red('Invalid version number, use x.y.z format')+' ('+version+')');
-				fail();
+				console.log('Installing packet '+clc.cyan(packetName));	
 			}
+
+
+			bower.commands.install([packetName],{save: true})
+				.on('result',function(result) {
+					console.log(result.replace(/\n$/g,''));	
+				})
+				.on('packages',function(pack) {
+					console.log(pack.replace(/\n$/g,''));	
+				})
+				.on('data',function(data) {
+					console.log(data.replace(/\n$/g,''));	
+				})
+				.on('end', function (data) {
+					console.log('Install complete');
+					complete();
+				});			
 		} else {
-			console.log('Installing packet '+clc.cyan(packetName));	
+
+			bower.commands.install()
+				.on('result',function(result) {
+					console.log(result.replace(/\n$/g,''));	
+				})
+				.on('packages',function(pack) {
+					console.log(pack.replace(/\n$/g,''));	
+				})
+				.on('data',function(data) {
+					console.log(data.replace(/\n$/g,''));	
+				})
+				.on('end', function (data) {
+					console.log('Install complete');
+					complete();
+				});			
 		}
-						
-		bower.commands.install([packetName],{save: true})
-			.on('result',function(result) {
-				console.log(result);	
-			})
-			.on('packages',function(pack) {
-				console.log(pack);	
-			})
-			.on('data',function(data) {
-				console.log(data);	
-			})
-			.on('end', function (data) {
-				console.log('Install complete');
-				complete();
-			});
 		
 	});
 
