@@ -43,6 +43,7 @@ A basic test file looks like
 				expect(true).toBe(true);	
 			});
 		});
+		// asynch testing
 		describe('my test 2',function() {
 			var async = new AsyncSpec(this);
 			it('deve pingare il server sup',function(done) {
@@ -52,7 +53,12 @@ A basic test file looks like
 		});
 	})();
 
-tbd
+It's possibile to choose two kind of reporters:
+	- cli: show the result on the command line (useful for testing user interface elements)
+	- html: show the result in the application (useful for testing models, where the debug output is important) 
+
+Test files follows the Jasmine BDD styles, the following commands are available:
+
 
 
 ## Documentation

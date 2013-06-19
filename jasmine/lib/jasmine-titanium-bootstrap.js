@@ -27,19 +27,6 @@
 			backgroundColor: '#000000',
 			zIndex: 999
 		});
-
-/*		
-		var realoadButton = Ti.UI.createButton({			
-			title: 'Reaload'			
-		});
-		realoadButton.addEventListener('click',function(e) {
-			
-			var result = options.realoadCallback();
-			
-			Ti.API.info('result reload ')
-			
-		});
-*/		
 		
 		var titaniumTestsResultsWebView = Ti.UI.createWebView({
 			html: ''
@@ -49,10 +36,10 @@
 		
 		var testResults = '';
 		var testResultsHeader = '<html><head>'
-	        +'<link rel="stylesheet" href="/tirunner/reporter/bootstrap.css" type="text/css">'
-	        +'<link rel="stylesheet" href="/tirunner/reporter/jasmine-bootstrap.css" type="text/css">' 
-	        +'<script type="text/javascript" src="/tirunner/reporter/jquery-1.9.1.js"></script>'
-	        +'<script type="text/javascript" src="/tirunner/reporter/tirunner.js"></script>'
+	        +'<link rel="stylesheet" href="'+Titanium.Filesystem.resourcesDirectory+'/tirunner/reporter/bootstrap.css" type="text/css">'
+	        +'<link rel="stylesheet" href="'+Titanium.Filesystem.resourcesDirectory+'/tirunner/reporter/jasmine-bootstrap.css" type="text/css">' 
+	        +'<script type="text/javascript" src="'+Titanium.Filesystem.resourcesDirectory+'/tirunner/reporter/jquery-1.9.1.js"></script>'
+	        +'<script type="text/javascript" src="'+Titanium.Filesystem.resourcesDirectory+'/tirunner/reporter/tirunner.js"></script>'
 			//+'<style type="text/css">body{font-size:14px;font-family:helvetica;background-color:#000000;color:#ffffff;}</style>'
 			+'</head><body>'
 			+'<div class="jasmine_reporter container show-passed">'
@@ -64,7 +51,6 @@
 		var testResultsFooter = '</div></body></html>';
 		var capture_spec = '';
 		this.updateTestResults = function(message) {
-console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFooter);
 			testResults += message;
 			titaniumTestsResultsWebView.setHtml(
 				testResultsHeader+testResults+testResultsFooter,
@@ -86,10 +72,10 @@ console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFo
 
         reportSpecResults: function(spec) {
 
-/*
-{"totalCount":1,"passedCount":1,"failedCount":0,"skipped":false,"items_":[{"type":"expect","matcherName":"toBeTruthy","passed_":true,"actual":"true","message":"Passed.","trace":""}],"description":"contains a single spec"}
-
-*/
+			/*
+			{"totalCount":1,"passedCount":1,"failedCount":0,"skipped":false,"items_":[{"type":"expect","matcherName":"toBeTruthy","passed_":true,"actual":"true","message":"Passed.","trace":""}],"description":"contains a single spec"}
+			
+			*/
 
 			
 			//var pass = spec.results().passedCount + ' pass';
