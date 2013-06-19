@@ -1,3 +1,5 @@
+var _ = require("/tirunner/jasmine/underscore")._;
+
 (function() {
     
     var capture_spec = '';
@@ -5,6 +7,8 @@
     if (!jasmine) {
         throw new Exception("jasmine library does not exist in global namespace!");
     }
+    
+    var stackMessages = null;
     
     /**
 	* TitaniumReporter, by Guilherme Chapiewski - http://guilhermechapiewski.com
@@ -21,12 +25,6 @@
 	* jasmine.getEnv().execute();
 	*/
 	var TitaniumReporter = function() {
-		// create Titanium Window and WebView to display results
-		var titaniumTestWindow = Titanium.UI.createWindow({
-			title:'Application Tests',
-			backgroundColor: '#000000',
-			zIndex: 999
-		});
 
 /*		
 		var realoadButton = Ti.UI.createButton({			
@@ -40,38 +38,16 @@
 			
 		});
 */		
-		
-		var titaniumTestsResultsWebView = Ti.UI.createWebView({
-			html: ''
-		});
-		titaniumTestWindow.add(titaniumTestsResultsWebView);
-		titaniumTestWindow.open();
-		
-		var testResults = '';
-		var testResultsHeader = '<html><head>'
-	        +'<link rel="stylesheet" href="/tirunner/reporter/bootstrap.css" type="text/css">'
-	        +'<link rel="stylesheet" href="/tirunner/reporter/jasmine-bootstrap.css" type="text/css">' 
-	        +'<script type="text/javascript" src="/tirunner/reporter/jquery-1.9.1.js"></script>'
-	        +'<script type="text/javascript" src="/tirunner/reporter/tirunner.js"></script>'
-			//+'<style type="text/css">body{font-size:14px;font-family:helvetica;background-color:#000000;color:#ffffff;}</style>'
-			+'</head><body>'
-			+'<div class="jasmine_reporter container show-passed">'
-				+'<h1 class="banner well"><span class="logo"><span class="title">TiRunner Tests</span>'
-				+'<small class="version"></small></span></h1>';
+				
+	
 
-
-
-		var testResultsFooter = '</div></body></html>';
 		var capture_spec = '';
-		this.updateTestResults = function(message) {
-console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFooter);
-			testResults += message;
-			titaniumTestsResultsWebView.setHtml(
-				testResultsHeader+testResults+testResultsFooter,
-				{
-					baseURL: '/'
-				}
-			);
+		this.updateTestResults = function(messages) {
+			
+			//_(stackMessages).each(function(item) {
+			//	Ti.API.info(item);
+			//});
+
 		};
     };
 
@@ -82,14 +58,10 @@ console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFo
 
         reportRunnerStarting: function(runner) {
             //this.log('<h3>Test Runner Started.</h3>');
+			stackMessages = [];
         },
 
         reportSpecResults: function(spec) {
-
-/*
-{"totalCount":1,"passedCount":1,"failedCount":0,"skipped":false,"items_":[{"type":"expect","matcherName":"toBeTruthy","passed_":true,"actual":"true","message":"Passed.","trace":""}],"description":"contains a single spec"}
-
-*/
 
 			
 			//var pass = spec.results().passedCount + ' pass';
@@ -97,11 +69,13 @@ console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFo
 			var result = '';
 
 			if (!spec.results().passed()) {
-				result += '<div class="spec alert failed alert-error">'
-					+'<a class="description">'+spec.description+' ('+spec.results().passedCount+') passed</a>';
+				//result += '<div class="spec alert failed alert-error">'
+				//	+'<a class="description">'+spec.description+' ('+spec.results().passedCount+') passed</a>';
+				stackMessages.push(spec.description+' ('+spec.results().passedCount+') passed');
 			} else {
-				result += '<div class="spec alert passed alert-success">'					
-					+'<a class="description">'+spec.description+' ('+spec.results().passedCount+') passed</a>';
+				//result += '<div class="spec alert passed alert-success">'					
+				//	+'<a class="description">'+spec.description+' ('+spec.results().passedCount+') passed</a>';
+				stackMessages.push(spec.description+' ('+spec.results().passedCount+') passed');
 			}
 
 
@@ -114,13 +88,14 @@ console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFo
 
 					if (!spec.results().items_[i].passed_) {
 
-						result += '<div class="messages">';
+						//result += '<div class="messages">';
 						//	+'<div class="resultMessage fail">'+(i+1) + ' - ' + spec.results().items_[i].message+'</div>';						
 						if (spec.results().items_[i].trace != null) {
-							result += '<pre class="stackTrace"><strong>'+(i+1)+'</strong> '+spec.results().items_[i].trace.message+'</pre>';
+							//result += '<pre class="stackTrace"><strong>'+(i+1)+'</strong> '+spec.results().items_[i].trace.message+'</pre>';
+							stackMessages.push('['+(i+1)+'] '+spec.results().items_[i].trace.message);
 						}
 						
-						result += '</div>';
+						//result += '</div>';
 						//result += ('&nbsp;&nbsp;&nbsp;&nbsp;(' + (i+1) + ') ' + spec.results().items_[i].message + '<br>');
 						
 						/*
@@ -136,16 +111,19 @@ console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFo
 			}
 			//Ti.API.debug(JSON.stringify(spec.results()));			
 			
-			result += '</div>';
+			//result += '</div>';
 			
 			// store for later
-			capture_spec += result;
+capture_spec += result;
 			//this.log(result);
         },
 
         reportSpecStarting: function(spec) {
             
             //this.log('spec start[' + spec.suite.description + '] ' + spec.description + '... <br>');
+            
+            //Ti.API.info('- '+spec.description);
+            
             
             //Ti.API.info('spec--- '+JSON.stringify(spec))
             
@@ -164,6 +142,7 @@ console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFo
             var results = suite.results();
             var html = '';
             
+            /*
             if (results.passedCount == results.totalCount) {
 	        	html += '<div class="suite alert alert-block passed alert-success hide-messages">'
 	        		+'<a class="run_spec btn btn-mini btn-info">OK</a>'
@@ -171,20 +150,31 @@ console.log('UPDSTE TESTSTSTSSTSTSS'+testResultsHeader+testResults+testResultsFo
             } else {
 	            html += '<div class="suite alert alert-block failed alert-error">';
             }
-                        
-            html += '<a class="description">'+suite.description+' ('+results.passedCount+' of '+results.totalCount+')<a>';
+            */
+
+			
+			//Ti.API.info('  Passed: '+results.passedCount+' of '+results.totalCount)                        
+            //html += '<a class="description">'+suite.description+' ('+results.passedCount+' of '+results.totalCount+')<a>';
+			Ti.API.info('* '+suite.description+' ('+results.passedCount+' of '+results.totalCount+')');
             
-            html += capture_spec;
-            capture_spec = '';
+            _(stackMessages).each(function(message) {
+	            Ti.API.info('*   - '+message);
+            })
+            stackMessages = [];
             
-            html += '</div>';
             
-            this.log(html);
+            //html += capture_spec;
+            
+            //capture_spec = '';
+            
+            //html += '</div>';
+            
+            this.log(stackMessages);
 
         },
 
-        log: function(str) {
-            this.updateTestResults(str);
+        log: function(messages) {
+            this.updateTestResults(messages);
         }
     };
     
