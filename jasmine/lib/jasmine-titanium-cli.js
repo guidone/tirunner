@@ -10,36 +10,7 @@ var _ = require("/tirunner/jasmine/underscore")._;
     
     var stackMessages = null;
     
-    /**
-	* TitaniumReporter, by Guilherme Chapiewski - http://guilhermechapiewski.com
-	*
-	* TitaniumReporter is a Jasmine reporter that outputs spec results to a new 
-	* window inside your iOS application. It helps you develop Titanium Mobile 
-	* applications with proper unit testing.
-	* 
-	* More info at http://github.com/guilhermechapiewski/titanium-jasmine
-	*
-	* Usage:
-	*
-	* jasmine.getEnv().addReporter(new jasmine.TitaniumReporter());
-	* jasmine.getEnv().execute();
-	*/
 	var TitaniumReporter = function() {
-
-/*		
-		var realoadButton = Ti.UI.createButton({			
-			title: 'Reaload'			
-		});
-		realoadButton.addEventListener('click',function(e) {
-			
-			var result = options.realoadCallback();
-			
-			Ti.API.info('result reload ')
-			
-		});
-*/		
-				
-	
 
 		var capture_spec = '';
 		this.updateTestResults = function(messages) {
@@ -109,13 +80,7 @@ var _ = require("/tirunner/jasmine/underscore")._;
 					} 
 				}
 			}
-			//Ti.API.debug(JSON.stringify(spec.results()));			
-			
-			//result += '</div>';
-			
-			// store for later
-capture_spec += result;
-			//this.log(result);
+
         },
 
         reportSpecStarting: function(spec) {
@@ -158,7 +123,11 @@ capture_spec += result;
 			Ti.API.info('* '+suite.description+' ('+results.passedCount+' of '+results.totalCount+')');
             
             _(stackMessages).each(function(message) {
-	            Ti.API.info('*   - '+message);
+	            if (message[0] == '[') {
+		            Ti.API.error('*   - '+message);
+	            } else {
+		            Ti.API.info('*   - '+message);		            
+	            }
             })
             stackMessages = [];
             

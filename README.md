@@ -59,6 +59,20 @@ It's possibile to choose two kind of reporters:
 
 Test files follows the Jasmine BDD styles, the following commands are available:
 
+- toHaveProperty(property)
+- toBe(value)
+- toBeA(type): where type is array, object, boolean, number, string, function, date
+- toBeEmpty, toBeElement, toBeisArray, toBeArguments, toBeFunction, toBeString, toBeNumber, toBeBoolean, toBeDate, toBeNaN, toBeNull, toBeUndefined
+- toBeLessThan(value)
+- toBeGreatherThan(value)
+- include
+- all
+- any
+- toBeFlat
+- toHaveUniqueValues
+- toInclude
+- allToSatisfy
+- anyToSatisfy
 
 
 ## Documentation

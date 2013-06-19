@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.5.0';
+var tirunnerVersion = '0.5.1';
 var _tiapp = null;
 var _tilocal = null;
 var _globalLineCount = 0;
@@ -660,11 +660,24 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			if (msg.indexOf('[INFO]') !== -1) {
 				console.log(msg.replace('[INFO]',clc.green('[INFO]')));	
 			} else if (msg.indexOf('[ERROR]') !== -1) {
+				//console.log(msg.replace('[ERROR]',clc.red('[ERROR]')));	
+			}			
+		});
+					
+	};
+	var stderrListener = function(raw) {
+		var msg = raw.toString().split('\n');		
+		msg.forEach(function(msg) {
+			if (msg.indexOf('SupMboFindAllWrapperProxy.m') != -1) {
+				return false;
+			}
+			if (msg.indexOf('[ERROR]') !== -1) {
 				console.log(msg.replace('[ERROR]',clc.red('[ERROR]')));	
 			}			
 		});
 					
 	};
+
 	
 	function getUserHome() {
 		return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -722,6 +735,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			}
 		);
 		ex.addListener('stdout',stdoutListener);
+		ex.addListener('stderr',stderrListener);
 		
 		ex.run();
 		
@@ -829,6 +843,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			}
 		);
 		ex.addListener('stdout',stdoutListener);
+		ex.addListener('stderr',stderrListener);
 		ex.run();
 	
 		
