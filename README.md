@@ -82,7 +82,44 @@ tbd
 tbd
 
 ## Components
-tdb
+In order the access the components repository, it's needed to register the ssh key to access the server (see below)
+
+List all components available
+
+	jake components
+	
+To install a component
+
+	jake install[my_component]
+
+To install a specific version
+
+	jake install[my_component,1.0.0]
+	
+To remove a component
+
+	jake uninstall[my_component]
+
+Components are installed under /Resources/components
+Some features are available only with bower command line (install using "sudo npm install bower").
+For example to see the installed components
+
+	bower ls
+	
+or to get information about a component (for example the available versions):
+
+	bower info my_component	  
+
+## Access to GIT repository
+To access the components repository, a SSH key is needed
+
+	cd ~/.ssh
+	ssh-keygen -t rsa -C "your_email@example.com"
+	~/.ssh/id_rsa.pub
+	
+Then add to the server
+
+	cat ~/.ssh/id_rsa.pub | ssh user@hostname 'cat >> .ssh/authorized_keys'	
 
 ## Credits
 TiRunner uses this components
