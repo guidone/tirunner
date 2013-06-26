@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.5.2';
+var tirunnerVersion = '0.5.3';
 var _tiapp = null;
 var _tilocal = null;
 var _globalLineCount = 0;
