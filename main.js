@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.5.3';
+var tirunnerVersion = '0.5.4';
 var _tiapp = null;
 var _tilocal = null;
 var _globalLineCount = 0;
@@ -26,7 +26,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		fs.writeFileSync(appPath+'/.bowerrc',bowerrc,'utf8'); 
 		
 		// if not exist, create the component.js
-		if (!fs.existsSync(appPath+'/component.json')) {
+		if (!fs.existsSync(appPath+'/bower.json')) {
 
 			var component = {
 			  "name": _tiapp['ti:app']['name'][0],
@@ -36,7 +36,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			  }
 			}
 			
-			fs.writeFileSync(appPath+'/component.json',JSON.stringify(component),'utf8'); 
+			fs.writeFileSync(appPath+'/bower.json',JSON.stringify(component),'utf8'); 
 
 		}
 		
@@ -77,6 +77,81 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			})
 
 		
+	});
+
+
+	function extractDescriptionFromMarkdown(str) {
+		
+		var markdown = require( "markdown" ).markdown;
+		var parsed = markdown.parse(str);
+		
+		if (parsed[0] == 'markdown') {
+			
+			var title = _(parsed).find(function(item) {
+				return item.length >= 3 && item[0] == 'header' && _.isObject(item[1]) && item[1].level == 1;
+			});
+			
+			var description = _(parsed).find(function(item) {
+				return item.length >= 2 && item[0] == 'para';
+			});
+						
+			if (title != null && description != null) {
+				return {
+					title: title[2],
+					description: description[1]
+				};
+			} else {
+				return null;
+			}
+		}
+			
+		
+	}
+
+	desc('Get information about a component');
+	task('info',['init'],{async: true},function(name,version) {
+
+
+		// just install the package
+		if (name != null) {
+
+			// convert to string
+			var packetName = String(name);
+			
+			console.log('Getting information about '+clc.cyan(packetName));
+		
+			bower.commands.info([packetName])
+				.on('result',function(result) {
+					console.log(result.replace(/\n$/g,''));	
+				})
+				//.on('packages',function(pack) {
+				//	console.log(pack.replace(/\n$/g,''));	
+				//})
+				.on('data',function(data) {
+					console.log(data.replace(/\n$/g,''));	
+				})
+				.on('end', function (data) {
+									
+					if (data != null && data.pkg != null && data.pkg.json != null) {
+						//parsed = extractDescriptionFromMarkdown(data.pkg.json.readme);
+						console.log('Name: '+clc.cyan(data.pkg.json.name));
+						console.log('Versions: '+clc.cyan(data.versions.join(', ')));
+						console.log('Description: ');						
+						var clcDescription = clc.xterm(246);
+						console.log(clcDescription(data.pkg.json.description));
+						console.log('');
+					}
+					
+					//console.log(data);
+					complete();
+				});				
+			
+			
+		} else {
+			console.log(clc.red('Unspecified component name'));
+		}
+			
+	
 	});
 
 	

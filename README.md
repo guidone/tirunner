@@ -4,7 +4,7 @@ TiRunner is a Titanium command line utility to run apps, launch tests and handle
 
 For installation, type
 
-	sudo npm install tirunner -g
+	sudo npm install tirunner
 
 ## Requirements
 In order to work properly, Titanium CLI is needed
@@ -13,7 +13,11 @@ In order to work properly, Titanium CLI is needed
 	
 And also Bower might be useful (the Twitter component manager)
 
-	sudo npm install bower	
+	sudo npm install bower
+
+Install git command line
+
+	https://help.github.com/articles/set-up-git
 
 ## Available commands
 Run jake -T to list all available commands
@@ -82,7 +86,7 @@ tbd
 tbd
 
 ## Components
-In order the access the components repository, it's needed to register the ssh key to access the server (see below)
+In order the access the components repository, it's needed to register the ssh key to access the server (see below). 
 
 List all components available
 
