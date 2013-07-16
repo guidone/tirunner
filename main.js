@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.5.4';
+var tirunnerVersion = '0.5.5';
 var _tiapp = null;
 var _tilocal = null;
 var _globalLineCount = 0;
@@ -15,19 +15,37 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 
 	var jshint = require(appPath+'/node_modules/tirunner/node_modules/jshint/packages/jshint/jshint.js').JSHINT;	
 	
-	
+
+	function checkForComponentsInitializazion() {
+		
+		if (!fs.existsSync(appPath+'/.bowerrc')) {
+			console.log(clc.red('Erorr: missing .bowerrc configuration file, please run jake init'));
+			console.log('');
+			process.exit();
+		}
+		
+		return true;
+	}
+
+	function checkForComponentsBowerJson() {
+		
+		if (!fs.existsSync(appPath+'/bower.json')) {
+			console.log(clc.red('Erorr: missing bower.json configuration file, please run jake init'));
+			console.log('');
+			process.exit();
+		}
+		
+		return true;
+	}
+
 	desc('Init the packet manager');
 	task('init',['tiapp'],function() {
-		
-		// write the bowerrc anyway
-		var bowerrc = '{"directory": "Resources/components","json": "bower.json",'
-			+'"endpoint"  : "http://titanium.dsgroup.it:81"}';
-		
-		fs.writeFileSync(appPath+'/.bowerrc',bowerrc,'utf8'); 
-		
+						
 		// if not exist, create the component.js
 		if (!fs.existsSync(appPath+'/bower.json')) {
 
+			console.log('Writing '+clc.cyan('bower.json'));
+			
 			var component = {
 			  "name": _tiapp['ti:app']['name'][0],
 			  "version": _tiapp['ti:app']['version'][0], 
@@ -39,15 +57,58 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			fs.writeFileSync(appPath+'/bower.json',JSON.stringify(component),'utf8'); 
 
 		}
+
+		if (!fs.existsSync(appPath+'/.bowerrc')) {
+			
+			console.log('Writing '+clc.cyan('.bowerrc'));
+			
+			// write the bowerrc anyway
+			var bowerrc = '{"directory": "Resources/components","json": "bower.json",'
+				+'"endpoint"  : "http://titanium.dsgroup.it:81"}';
+			
+			fs.writeFileSync(appPath+'/.bowerrc',bowerrc,'utf8'); 
+		
+			setTimeout(function() {
+				// wait a while or bower will fail
+				complete();
+			},1000);
+			
+		}
 		
 		console.log('Init packet manager...'+clc.green('OK'));
 				
 	});
+
+
+	desc('Show all installed components and dependecies');
+	task('ls',['tiapp'],function() {
+
+		checkForComponentsInitializazion();
+		checkForComponentsBowerJson();
+
+		console.log('Installed components and dependecies');
+		console.log('');
+	
+		bower.commands.ls()
+			.on('packages',function(pack) {
+				// do nothing	
+			})
+			.on('data',function(data) {
+
+				console.log(data);	
+			})
+			.on('end', function (data) {
+				complete();
+			});	
+		
+	});
 	
 	desc('Show all available components');
-	task('components',['init'],{async: true},function() {
+	task('components',['tiapp'],{async: true},function() {
 	
-		console.log('Available components ');
+		checkForComponentsInitializazion();
+
+		console.log('Available components');
 	
 		bower.commands.search()
 				.on('packages',function(pack) {
@@ -63,8 +124,60 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		
 	});
 	
+	desc('Symlink a component folder');
+	task('symlink',['tiapp'],{async: true},function(name,version) {
+		
+		checkForComponentsInitializazion();
+		checkForComponentsBowerJson();
+							
+		// just install the package
+		if (name != null) {
+
+			// convert to string
+			var packetName = String(name);
+			console.log('Linking component '+clc.cyan(packetName));	
+
+
+			bower.commands.link([packetName],{save: true})
+				.on('result',function(result) {
+					console.log(result.replace(/\n$/g,''));	
+				})
+				.on('packages',function(pack) {
+					console.log(pack.replace(/\n$/g,''));	
+				})
+				.on('data',function(data) {
+					console.log(data.replace(/\n$/g,''));	
+				})
+				.on('end', function (data) {
+					console.log('Linking complete');
+					complete();
+				});			
+		} else {
+
+			bower.commands.link()
+				.on('result',function(result) {
+					console.log(result.replace(/\n$/g,''));	
+				})
+				.on('packages',function(pack) {
+					console.log(pack.replace(/\n$/g,''));	
+				})
+				.on('data',function(data) {
+					console.log(data.replace(/\n$/g,''));	
+				})
+				.on('end', function (data) {
+					console.log('Linking complete');
+					complete();
+				});			
+		}
+		
+	});
+	
+	
 	desc('List all installed components');
-	task('list',['init'],{async: true},function() {
+	task('list',['tiapp'],{async: true},function() {
+
+		checkForComponentsInitializazion();
+		checkForComponentsBowerJson();
 	
 		console.log('Installed components:');
 	
@@ -109,8 +222,9 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	}
 
 	desc('Get information about a component');
-	task('info',['init'],{async: true},function(name,version) {
+	task('info',['tiapp'],{async: true},function(name,version) {
 
+		checkForComponentsInitializazion();
 
 		// just install the package
 		if (name != null) {
@@ -156,8 +270,10 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 
 	
 	desc('Install a packet from repository');
-	task('install',['init'],{async: true},function(name,version) {
+	task('install',['tiapp'],{async: true},function(name,version) {
 		
+		checkForComponentsInitializazion();
+		checkForComponentsBowerJson();
 							
 		// just install the package
 		if (name != null) {
@@ -215,7 +331,10 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 
 
 	desc('Uninstall a packet from project');
-	task('uninstall',['init'],{async: true},function(name,version) {
+	task('uninstall',['tiapp'],{async: true},function(name,version) {
+
+		checkForComponentsInitializazion();
+		checkForComponentsBowerJson();
 					
 		if (name == null || name == '') {
 			console.log(clc.red('Missing packet name'));
@@ -289,7 +408,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		
 	});
 	
-	
+/*	
 	desc('Publish a component');
 	task('publish',{async: true},function() {
 		
@@ -336,6 +455,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 		
 		
 	});
+*/
 		
 	desc('Parse the tiapp.xml file');
 	task('tiapp',{async: true},function() {

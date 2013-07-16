@@ -1,6 +1,6 @@
 # TiRunner
 
-TiRunner is a Titanium command line utility to run apps, launch tests and handle components inside a Titanium project 
+**TiRunner** is a Titanium command line utility to run apps, launch tests and handle components inside a Titanium project 
 
 For installation, type
 
@@ -35,8 +35,12 @@ Run jake -T to list all available commands
 - **jake components**: List all available components
 - **jake list**: List all installed components
 - **jake install[component_name,version]**: Install a component, version paramenter could be omitted
+- **jake ls**: Show all installed components and dependencies
+- **jake symlink**: Create a symbloci link in the component folder (this is useful for debugging purpose without having to push the changes every time). Cast this command in the component folder, without any params. You'll need to cast this just once
+- **jake symlink[component_name]**: Create a symbolic link to the component folder (this is useful for debugging purpose without having to push the changes every time). Cast this command in the project directory 
 - **jake uninstall[component_name]**: Uninistall component
 - **jake bump**: Update the /cfg/* files with the version number of tiapp.xml
+- **jake init**: Init the component manager
 
 ## Testing
 A basic test file looks like
@@ -86,7 +90,9 @@ tbd
 tbd
 
 ## Components
-In order the access the components repository, it's needed to register the ssh key to access the server (see below). 
+In order the access the components repository, it's needed to register the ssh key to access the server (see below) and initialize the local project to the components
+
+	jake init
 
 List all components available
 
@@ -108,11 +114,11 @@ Components are installed under /Resources/components
 Some features are available only with bower command line (install using "sudo npm install bower").
 For example to see the installed components
 
-	bower ls
+	jake ls
 	
 or to get information about a component (for example the available versions):
 
-	bower info my_component	  
+	jake info[my_component]	  
 
 ## Access to GIT repository
 To access the components repository, a SSH key is needed
@@ -196,15 +202,17 @@ It's not very useful, every time a component is updated, repeat the steps 1 to 5
 That's where the *bower* command it's useful: it's possibile, inside a project, to link directly the component repository, in that case any changes to the component repository will be immediately reflected to linked project (but projects that use the component normally will be unaffected).
 To link a component, enter the component directory (for example /my_projects/my_component) and type
 
-	bower link
+	jake symlink
 
 Try with sudo if any problem. This will link your component globally on the system (this operation must be done just once)
 Then enter the app project directory (for example /my_projects/my_app) and type
 
-	bower link my_component
+	jake symlink[my_component]
 	
 This will create a symbolic link under ./Resources/components/my_component
 
+## Release notes
+- **0.5.5**: Added commands: symlink, ls, init
 
 ## Credits
 TiRunner uses this components
