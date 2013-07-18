@@ -80,6 +80,26 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	});
 
 
+	desc('Clean the cache of bower');
+	task('cacheclean',['tiapp'],function() {
+
+
+		console.log('Cleaning bower cache');
+
+		bower.commands['cache-clean']()
+			.on('error',function(pack) {
+				// do nothing	
+			})
+			.on('data',function(data) {
+				console.log(data.replace(/\n$/g,''));
+			})
+			.on('end', function (data) {
+				
+				complete();
+			});	
+		
+	});
+
 	desc('Show all installed components and dependecies');
 	task('ls',['tiapp'],function() {
 
@@ -115,7 +135,6 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 					// do nothing	
 				})
 				.on('data',function(data) {
-
 					console.log(data);	
 				})
 				.on('end', function (data) {

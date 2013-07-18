@@ -41,6 +41,7 @@ Run jake -T to list all available commands
 - **jake uninstall[component_name]**: Uninistall component
 - **jake bump**: Update the /cfg/* files with the version number of tiapp.xml
 - **jake init**: Init the component manager
+- **jake cacheclean**: Clear the cache of Bower
 
 ## Testing
 A basic test file looks like
@@ -211,7 +212,12 @@ Then enter the app project directory (for example /my_projects/my_app) and type
 	
 This will create a symbolic link under ./Resources/components/my_component
 
+## Troubleshooting
+- **Git error 128:** Perhaps the brach or tag were not pushed to the origin repository
+- **jake components returns a strage list of components**: you forgot the *jake init* command
+
 ## Release notes
+- **0.5.6**: Added command: cacheclean
 - **0.5.5**: Added commands: symlink, ls, init
 
 ## Credits
