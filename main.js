@@ -5,7 +5,7 @@ var parseString = require('xml2js').parseString;
 var _ = require('underscore');
 var bower = require('bower');
 
-var tirunnerVersion = '0.5.5';
+var tirunnerVersion = '0.5.7';
 var _tiapp = null;
 var _tilocal = null;
 var _globalLineCount = 0;
@@ -144,7 +144,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 	});
 	
 	desc('Symlink a component folder');
-	task('symlink',['tiapp'],{async: true},function(name,version) {
+	task('symlink',['tiapp'],{async: true},function(name) {
 		
 		checkForComponentsInitializazion();
 		checkForComponentsBowerJson();
@@ -157,7 +157,7 @@ module.exports = function(jake,desc,task,complete,fail,file,namespace,appPath) {
 			console.log('Linking component '+clc.cyan(packetName));	
 
 
-			bower.commands.link([packetName],{save: true})
+			bower.commands.link(packetName)
 				.on('result',function(result) {
 					console.log(result.replace(/\n$/g,''));	
 				})
